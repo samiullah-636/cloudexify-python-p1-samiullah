@@ -25,7 +25,7 @@ def print_banner():
 
 
 def display_menu():
-    print_banner()  # Banner menu ke sath hi display hoga
+    print_banner()  
     print("=" * 40)
     print("[1]. Add Expense")
     print("[2]. View Expenses")
@@ -85,6 +85,40 @@ def add_expense():
     expense_id += 1
 
 
+def view_expenses():
+    
+    if not expenses:
+        print("\nNo Expenses for now!")
+        return
+
+    print("\n" + "=" * 52)
+    print("                --- ALL EXPENSES ---                ")
+    print("=" * 52)
+
+
+    print(
+        f"{'ID':<5} {'Description':<20} {'Category':<12} {'Amount (PKR)':>12}"
+    )
+    print("-" * 52)
+
+    total_amount = 0.0
+
+    
+    for exp in expenses:
+        print(
+            f"{exp['id']:<5} "
+            f"{exp['description']:<20} "
+            f"{exp['category']:<12} "
+            f"{exp['amount']:>12.2f}"
+        )
+        total_amount += exp["amount"]
+
+    
+    print("-" * 52)
+    print(f"{'TOTAL EXPENSE:':<38} PKR {total_amount:>9.2f}")
+    print("=" * 52)
+
+
 def main():
     while True:
         clear_screen()
@@ -96,7 +130,7 @@ def main():
             case "1":
                 add_expense()
             case "2":
-                print("view expense called")
+                view_expenses()
             case "3":
                 print("category summary called")
             case "4":
@@ -111,7 +145,6 @@ def main():
             case _:
                 print("Invalid Option! Please select from [1-7]")
 
-        # Iss Pause se user output dekh sakega, warna screen foran clear ho jati hai
         if choice != "7":
             input("\nPress Enter to continue...")
 
