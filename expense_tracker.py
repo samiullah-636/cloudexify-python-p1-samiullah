@@ -161,6 +161,66 @@ def category_summary():
     print("=" * 45)
 
 
+def filter_by_category():
+    
+    if not expenses:
+        print("\nNo expenses recorded yet to filter!")
+        return
+
+    
+    categories = ["Food", "Transport", "Shopping", "Bills", "Other"]
+    print("\nSelect Category to Filter:")
+    for index, category_name in enumerate(categories, 1):
+        print(f"  {index}). {category_name}")
+
+    while True:
+        try:
+            choice = int(input("Select category (1-5): "))
+            if 1 <= choice <= len(categories):
+                selected_category = categories[choice - 1]
+                break
+            print("Please select a number from 1 to 5!")
+        except ValueError:
+            print("Please enter a valid number.")
+
+    
+    filtered_expenses = [
+        exp for exp in expenses if exp["category"] == selected_category
+    ]
+
+    
+    if not filtered_expenses:
+        print(f"\n No expenses found under '{selected_category}' category.")
+        return
+
+    
+    print("\n" + "=" * 52)
+    print(
+        f"          --- EXPENSES FOR: {selected_category.upper()} ---          "
+    )
+    print("=" * 52)
+    print(
+        f"{'ID':<5} {'Description':<20} {'Category':<12} {'Amount (PKR)':>12}"
+    )
+    print("-" * 52)
+
+    category_total = 0.0
+    for exp in filtered_expenses:
+        print(
+            f"{exp['id']:<5} "
+            f"{exp['description']:<20} "
+            f"{exp['category']:<12} "
+            f"{exp['amount']:>12.2f}"
+        )
+        category_total += exp["amount"]
+
+    print("-" * 52)
+    print(
+        f"{f'TOTAL FOR {selected_category.upper()}:':<38} PKR {category_total:>9.2f}"
+    )
+    print("=" * 52)
+
+
 def main():
     while True:
         clear_screen()
@@ -176,7 +236,7 @@ def main():
             case "3":
                 category_summary()
             case "4":
-                print("filter by category called")
+                filter_by_category()
             case "5":
                 print("delete expense called")
             case "6":
