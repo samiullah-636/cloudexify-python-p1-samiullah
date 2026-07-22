@@ -119,6 +119,48 @@ def view_expenses():
     print("=" * 52)
 
 
+
+def category_summary():
+    
+    if not expenses:
+        print("\nNo Expenses for now!")
+        return
+
+    
+    summary = {}
+    grand_total = 0.0
+
+    for exp in expenses:
+        cat = exp["category"]
+        amt = exp["amount"]
+
+        if cat in summary:
+            summary[cat] += amt
+        else:
+            summary[cat] = amt
+
+        grand_total += amt
+
+    
+    print("\n" + "=" * 45)
+    print("            --- CATEGORY SUMMARY ---         ")
+    print("=" * 45)
+    print(f"{'Category':<15} {'Amount (PKR)':>12} {'Percentage':>12}")
+    print("-" * 45)
+
+    for category_name, cat_total in summary.items():
+        percentage = (cat_total / grand_total) * 100
+        print(
+            f"{category_name:<15} "
+            f"{cat_total:>12.2f} "
+            f"{percentage:>11.1f}%"
+        )
+
+    print("-" * 45)
+    print(f"{'GRAND TOTAL:':<15} PKR {grand_total:>8.2f}  (100.0%)")
+    print("=" * 45)
+
+
 def main():
     while True:
         clear_screen()
@@ -132,7 +174,7 @@ def main():
             case "2":
                 view_expenses()
             case "3":
-                print("category summary called")
+                category_summary()
             case "4":
                 print("filter by category called")
             case "5":
