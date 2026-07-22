@@ -282,7 +282,35 @@ def save_expenses():
         print(f"\nError saving data: {err}")
 
 
+def load_expenses():
+    global expense_id
+
+    if not os.path.exists(FILE_NAME):
+        return
+
+    try:
+        with open(FILE_NAME, "r") as file:
+            for line in file:
+                line = line.strip()
+                if line:
+                    parts = line.split(",")
+                    if len(parts) == 4:
+                        rec_id = int(parts[0])
+                        rec = {
+                            "id": rec_id,
+                            "description": parts[1],
+                            "amount": float(parts[2]),
+                            "category": parts[3],
+                        }
+                        expenses.append(rec)
+                        if rec_id >= expense_id:
+                            expense_id = rec_id + 1
+    except Exception as err:
+        print(f"\nWarning: Could not read existing file data ({err}).")
+
+
 def main():
+    load_expenses()
     while True:
         clear_screen()
         display_menu()
