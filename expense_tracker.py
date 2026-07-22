@@ -7,9 +7,18 @@ import subprocess
 # CloudExify Python Internship — Month 1 Project 1
 # Samiullah | Registration No: CX-INT-2026-PY-0057
 
+
+# ==========================================
+# Global Variables
+# ==========================================
 expenses = []
 expense_id = 1
 FILE_NAME = "expenses.txt"
+
+
+# ==========================================
+# Terminal & UI Helpers
+# ==========================================
 
 def clear_screen():
     command = "cls" if os.name == "nt" else "clear"
@@ -36,6 +45,9 @@ def display_menu():
     print("[7]. Save and Exit")
     print("=" * 40)
 
+# ==========================================
+# Core Logic Functions
+# ==========================================
 
 def add_expense():
     global expense_id
@@ -308,7 +320,9 @@ def load_expenses():
     except Exception as err:
         print(f"\nWarning: Could not read existing file data ({err}).")
 
-
+# ==========================================
+# Main Method
+# ==========================================
 def main():
     load_expenses()
     while True:
