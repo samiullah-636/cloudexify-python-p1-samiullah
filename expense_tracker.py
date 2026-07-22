@@ -9,7 +9,7 @@ import subprocess
 
 expenses = []
 expense_id = 1
-
+FILE_NAME = "expenses.txt"
 
 def clear_screen():
     command = "cls" if os.name == "nt" else "clear"
@@ -221,6 +221,67 @@ def filter_by_category():
     print("=" * 52)
 
 
+def delete_expense():
+    
+    if not expenses:
+        print("\nNo expenses recorded yet to delete!")
+        return
+
+    
+    view_expenses()
+
+    
+    while True:
+        try:
+            target_id = int(
+                input("\nEnter the ID of the expense to delete: ")
+            )
+            break
+        except ValueError:
+            print("Enter a valid number.")
+
+    
+    target_expense = None
+    for exp in expenses:
+        if exp["id"] == target_id:
+            target_expense = exp
+            break
+
+    
+    if not target_expense:
+        print(f"\nError: Expense with ID {target_id} not found!")
+        return
+
+    
+    print(
+        f"\nFound Expense: [ID: {target_expense['id']} | {target_expense['description']} | PKR {target_expense['amount']}]"
+    )
+    confirm = (
+        input("Are you sure you want to delete this expense? (y/n): ")
+        .strip()
+        .lower()
+    )
+
+    if confirm in ["y", "yes"]:
+        expenses.remove(target_expense)
+        print(f"\nExpense ID {target_id} deleted successfully!")
+    else:
+        print("\nDeletion cancelled. Expense was not removed.")
+
+
+# ==========================================
+# File I/O Operations
+# ==========================================
+def save_expenses():
+    try:
+        with open(FILE_NAME, "w") as file:
+            for e in expenses:
+                file.write(f"{e['id']},{e['description']},{e['amount']},{e['category']}\n")
+        print(f"\nData successfully saved in '{FILE_NAME}'.")
+    except Exception as err:
+        print(f"\nError saving data: {err}")
+
+
 def main():
     while True:
         clear_screen()
@@ -238,10 +299,11 @@ def main():
             case "4":
                 filter_by_category()
             case "5":
-                print("delete expense called")
+                delete_expense()
             case "6":
-                print("save expense called")
+                save_expenses()
             case "7":
+                save_expenses()
                 print("Exiting......")
                 break
             case _:
