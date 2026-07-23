@@ -1,3 +1,4 @@
+import csv
 from datetime import datetime
 import os
 import shutil
@@ -45,8 +46,9 @@ def display_menu():
     print("[4]. Filter By Category")
     print("[5]. Delete Expense")
     print("[6]. Set Monthly Budget")
-    print("[7]. Save Expenses")
-    print("[8]. Save and Exit")
+    print("[7]. Export to CSV Format")
+    print("[8]. Save Expenses")
+    print("[9]. Save and Exit")
     print("=" * 50)
 
     # Budget Warning Indicator
@@ -327,6 +329,35 @@ def delete_expense():
         print("\nDeletion cancelled. Expense was not removed.")
 
 
+def export_to_csv():
+    if not expenses:
+        print("\nNo expenses available to export!")
+        return
+
+    # Create timestamped CSV file name
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    csv_filename = f"expenses_export_{timestamp}.csv"
+
+    try:
+        with open(csv_filename, "w", newline="") as csvfile:
+            fieldnames = ["ID", "Description", "Amount (PKR)", "Category", "Date/Time"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writeheader()
+            for exp in expenses:
+                writer.writerow({
+                    "ID": exp["id"],
+                    "Description": exp["description"],
+                    "Amount (PKR)": exp["amount"],
+                    "Category": exp["category"],
+                    "Date/Time": exp.get("date", "N/A"),
+                })
+
+        print(f"\n✅ All expense records successfully exported to '{csv_filename}'!")
+    except Exception as err:
+        print(f"\nError exporting to CSV: {err}")
+
+
 # ==========================================
 # File I/O Operations
 # ==========================================
@@ -388,7 +419,7 @@ def main():
     while True:
         clear_screen()
         display_menu()
-        choice = input("select option [1-8]: ").strip()
+        choice = input("select option [1-9]: ").strip()
         print()
 
         match choice:
@@ -405,15 +436,17 @@ def main():
             case "6":
                 set_monthly_budget()
             case "7":
-                save_expenses()
+                export_to_csv()
             case "8":
+                save_expenses()
+            case "9":
                 save_expenses()
                 print("Exiting......")
                 break
             case _:
-                print("Invalid Option! Please select from [1-8]")
+                print("Invalid Option! Please select from [1-9]")
 
-        if choice != "8":
+        if choice != "9":
             input("\nPress Enter to continue...")
 
 
