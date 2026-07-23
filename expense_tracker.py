@@ -47,8 +47,9 @@ def display_menu():
     print("[5]. Delete Expense")
     print("[6]. Set Monthly Budget")
     print("[7]. Export to CSV Format")
-    print("[8]. Save Expenses")
-    print("[9]. Save and Exit")
+    print("[8]. Sort Expenses")
+    print("[9]. Save Expenses")
+    print("[10]. Save and Exit")
     print("=" * 50)
 
     # Budget Warning Indicator
@@ -92,7 +93,9 @@ def set_monthly_budget():
                 print("Budget target cannot be negative!")
                 continue
             monthly_budget = val
-            print(f"\n✅ Monthly budget target successfully set to PKR {monthly_budget:,.2f}!")
+            print(
+                f"\n✅ Monthly budget target successfully set to PKR {monthly_budget:,.2f}!"
+            )
             break
         except ValueError:
             print("Please enter a valid number.")
@@ -164,14 +167,15 @@ def add_expense():
     expense_id += 1
 
 
-def view_expenses():
+def view_expenses(custom_list=None, title="ALL EXPENSES"):
+    data_to_show = custom_list if custom_list is not None else expenses
 
-    if not expenses:
-        print("\nNo Expenses for now!")
+    if not data_to_show:
+        print("\nNo Expenses to display!")
         return
 
     print("\n" + "=" * 70)
-    print("                --- ALL EXPENSES ---                ")
+    print(f"                --- {title} ---                ")
     print("=" * 70)
 
     print(
@@ -181,7 +185,7 @@ def view_expenses():
 
     total_amount = 0.0
 
-    for exp in expenses:
+    for exp in data_to_show:
         dt = exp.get("date", "N/A")
         print(
             f"#{exp['id']:<4} {dt:<18} {exp['description']:<18} {exp['category']:<10} {exp['amount']:>12.2f}"
@@ -261,29 +265,52 @@ def filter_by_category():
         print(f"\n No expenses found under '{selected_category}' category.")
         return
 
-    print("\n" + "=" * 70)
-    print(
-        f"          --- EXPENSES FOR: {selected_category.upper()} ---          "
+    view_expenses(
+        filtered_expenses, title=f"EXPENSES FOR: {selected_category.upper()}"
     )
-    print("=" * 70)
-    print(
-        f"{'ID':<5} {'Date/Time':<18} {'Description':<18} {'Category':<10} {'Amount (PKR)':>12}"
-    )
-    print("-" * 70)
 
-    category_total = 0.0
-    for exp in filtered_expenses:
-        dt = exp.get("date", "N/A")
-        print(
-            f"#{exp['id']:<4} {dt:<18} {exp['description']:<18} {exp['category']:<10} {exp['amount']:>12.2f}"
-        )
-        category_total += exp["amount"]
 
-    print("-" * 70)
-    print(
-        f"{f'TOTAL FOR {selected_category.upper()}:':<55} PKR {category_total:>9.2f}"
-    )
-    print("=" * 70)
+def sort_expenses():
+    if not expenses:
+        print("\nNo expenses recorded yet to sort!")
+        return
+
+    print("\n--- SORT EXPENSES ---")
+    print("[1]. Sort by Amount (Low to High)")
+    print("[2]. Sort by Amount (High to Low)")
+    print("[3]. Sort by Date (Oldest First)")
+    print("[4]. Sort by Date (Newest First)")
+
+    while True:
+        choice = input("Select sort option [1-4]: ").strip()
+        if choice in ["1", "2", "3", "4"]:
+            break
+        print("Invalid choice! Select from [1-4].")
+
+    sorted_list = []
+    title = ""
+
+    match choice:
+        case "1":
+            sorted_list = sorted(expenses, key=lambda x: x["amount"])
+            title = "EXPENSES (AMOUNT: LOW TO HIGH)"
+        case "2":
+            sorted_list = sorted(
+                expenses, key=lambda x: x["amount"], reverse=True
+            )
+            title = "EXPENSES (AMOUNT: HIGH TO LOW)"
+        case "3":
+            sorted_list = sorted(
+                expenses, key=lambda x: x.get("date", "")
+            )
+            title = "EXPENSES (DATE: OLDEST FIRST)"
+        case "4":
+            sorted_list = sorted(
+                expenses, key=lambda x: x.get("date", ""), reverse=True
+            )
+            title = "EXPENSES (DATE: NEWEST FIRST)"
+
+    view_expenses(sorted_list, title=title)
 
 
 def delete_expense():
@@ -334,26 +361,35 @@ def export_to_csv():
         print("\nNo expenses available to export!")
         return
 
-    # Create timestamped CSV file name
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     csv_filename = f"expenses_export_{timestamp}.csv"
 
     try:
         with open(csv_filename, "w", newline="") as csvfile:
-            fieldnames = ["ID", "Description", "Amount (PKR)", "Category", "Date/Time"]
+            fieldnames = [
+                "ID",
+                "Description",
+                "Amount (PKR)",
+                "Category",
+                "Date/Time",
+            ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
             writer.writeheader()
             for exp in expenses:
-                writer.writerow({
-                    "ID": exp["id"],
-                    "Description": exp["description"],
-                    "Amount (PKR)": exp["amount"],
-                    "Category": exp["category"],
-                    "Date/Time": exp.get("date", "N/A"),
-                })
+                writer.writerow(
+                    {
+                        "ID": exp["id"],
+                        "Description": exp["description"],
+                        "Amount (PKR)": exp["amount"],
+                        "Category": exp["category"],
+                        "Date/Time": exp.get("date", "N/A"),
+                    }
+                )
 
-        print(f"\n✅ All expense records successfully exported to '{csv_filename}'!")
+        print(
+            f"\n✅ All expense records successfully exported to '{csv_filename}'!"
+        )
     except Exception as err:
         print(f"\nError exporting to CSV: {err}")
 
@@ -364,7 +400,6 @@ def export_to_csv():
 def save_expenses():
     try:
         with open(FILE_NAME, "w") as file:
-            # First line stores global budget settings
             file.write(f"BUDGET:{monthly_budget}\n")
             for e in expenses:
                 dt = e.get("date", "N/A")
@@ -419,7 +454,7 @@ def main():
     while True:
         clear_screen()
         display_menu()
-        choice = input("select option [1-9]: ").strip()
+        choice = input("select option [1-10]: ").strip()
         print()
 
         match choice:
@@ -438,15 +473,17 @@ def main():
             case "7":
                 export_to_csv()
             case "8":
-                save_expenses()
+                sort_expenses()
             case "9":
+                save_expenses()
+            case "10":
                 save_expenses()
                 print("Exiting......")
                 break
             case _:
-                print("Invalid Option! Please select from [1-9]")
+                print("Invalid Option! Please select from [1-10]")
 
-        if choice != "9":
+        if choice != "10":
             input("\nPress Enter to continue...")
 
 
