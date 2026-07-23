@@ -1,7 +1,7 @@
+from datetime import datetime
 import os
 import shutil
 import subprocess
-from datetime import datetime
 from pyfiglet import Figlet
 
 # expense_tracker.py
@@ -14,6 +14,7 @@ from pyfiglet import Figlet
 # ==========================================
 expenses = []
 expense_id = 1
+monthly_budget = 0.0  # 0.0 means no budget configured
 FILE_NAME = "expenses.txt"
 
 
@@ -37,20 +38,62 @@ def print_banner():
 
 def display_menu():
     print_banner()
-    print("=" * 40)
+    print("=" * 50)
     print("[1]. Add Expense")
     print("[2]. View Expenses")
     print("[3]. Category summary")
     print("[4]. Filter By Category")
     print("[5]. Delete Expense")
-    print("[6]. Save Expenses")
-    print("[7]. Save and Exit")
-    print("=" * 40)
+    print("[6]. Set Monthly Budget")
+    print("[7]. Save Expenses")
+    print("[8]. Save and Exit")
+    print("=" * 50)
+
+    # Budget Warning Indicator
+    if monthly_budget > 0:
+        current_month = datetime.now().strftime("%Y-%m")
+        current_month_spent = sum(
+            exp["amount"]
+            for exp in expenses
+            if exp.get("date", "").startswith(current_month)
+        )
+
+        print(
+            f"📌 Monthly Budget Target: PKR {monthly_budget:,.2f} | Spent: PKR {current_month_spent:,.2f}"
+        )
+
+        if current_month_spent > monthly_budget:
+            excess = current_month_spent - monthly_budget
+            print("=" * 50)
+            print(
+                f"⚠️  WARNING: You have EXCEEDED your monthly budget by PKR {excess:,.2f}!"
+            )
+            print("=" * 50)
 
 
 # ==========================================
 # Core Logic Functions
 # ==========================================
+
+
+def set_monthly_budget():
+    global monthly_budget
+    print("\n--- SET MONTHLY BUDGET ---")
+    print(f"Current Target: PKR {monthly_budget:,.2f}")
+
+    while True:
+        try:
+            val = float(
+                input("Enter new monthly budget target (PKR) [0 to disable]: ")
+            )
+            if val < 0:
+                print("Budget target cannot be negative!")
+                continue
+            monthly_budget = val
+            print(f"\n✅ Monthly budget target successfully set to PKR {monthly_budget:,.2f}!")
+            break
+        except ValueError:
+            print("Please enter a valid number.")
 
 
 def add_expense():
@@ -88,7 +131,6 @@ def add_expense():
         except ValueError:
             print("Enter a valid number!")
 
-    # Capture current Date and Time
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     expense = {
@@ -103,6 +145,19 @@ def add_expense():
     print(
         f"\nExpense added successfully at {current_time}! Assigned ID: {expense_id}"
     )
+
+    # Budget Alert Check on Addition
+    if monthly_budget > 0:
+        c_month = datetime.now().strftime("%Y-%m")
+        this_month_spent = sum(
+            e["amount"]
+            for e in expenses
+            if e.get("date", "").startswith(c_month)
+        )
+        if this_month_spent > monthly_budget:
+            print(
+                f"\n⚠️  ALERT: This expense puts you OVER your monthly budget of PKR {monthly_budget:,.2f}!"
+            )
 
     expense_id += 1
 
@@ -278,6 +333,8 @@ def delete_expense():
 def save_expenses():
     try:
         with open(FILE_NAME, "w") as file:
+            # First line stores global budget settings
+            file.write(f"BUDGET:{monthly_budget}\n")
             for e in expenses:
                 dt = e.get("date", "N/A")
                 file.write(
@@ -289,7 +346,7 @@ def save_expenses():
 
 
 def load_expenses():
-    global expense_id
+    global expense_id, monthly_budget
 
     if not os.path.exists(FILE_NAME):
         return
@@ -298,21 +355,27 @@ def load_expenses():
         with open(FILE_NAME, "r") as file:
             for line in file:
                 line = line.strip()
-                if line:
-                    parts = line.split(",")
-                    if len(parts) >= 4:
-                        rec_id = int(parts[0])
-                        rec_date = parts[4] if len(parts) >= 5 else "N/A"
-                        rec = {
-                            "id": rec_id,
-                            "description": parts[1],
-                            "amount": float(parts[2]),
-                            "category": parts[3],
-                            "date": rec_date,
-                        }
-                        expenses.append(rec)
-                        if rec_id >= expense_id:
-                            expense_id = rec_id + 1
+                if not line:
+                    continue
+
+                if line.startswith("BUDGET:"):
+                    monthly_budget = float(line.split(":")[1])
+                    continue
+
+                parts = line.split(",")
+                if len(parts) >= 4:
+                    rec_id = int(parts[0])
+                    rec_date = parts[4] if len(parts) >= 5 else "N/A"
+                    rec = {
+                        "id": rec_id,
+                        "description": parts[1],
+                        "amount": float(parts[2]),
+                        "category": parts[3],
+                        "date": rec_date,
+                    }
+                    expenses.append(rec)
+                    if rec_id >= expense_id:
+                        expense_id = rec_id + 1
     except Exception as err:
         print(f"\nWarning: Could not read existing file data ({err}).")
 
@@ -325,7 +388,7 @@ def main():
     while True:
         clear_screen()
         display_menu()
-        choice = input("select option [1-7]: ").strip()
+        choice = input("select option [1-8]: ").strip()
         print()
 
         match choice:
@@ -340,15 +403,17 @@ def main():
             case "5":
                 delete_expense()
             case "6":
-                save_expenses()
+                set_monthly_budget()
             case "7":
+                save_expenses()
+            case "8":
                 save_expenses()
                 print("Exiting......")
                 break
             case _:
-                print("Invalid Option! Please select from [1-7]")
+                print("Invalid Option! Please select from [1-8]")
 
-        if choice != "7":
+        if choice != "8":
             input("\nPress Enter to continue...")
 
 
