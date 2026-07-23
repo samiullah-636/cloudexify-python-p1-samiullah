@@ -10,7 +10,7 @@ from pyfiglet import Figlet
 # CloudExify Python Internship — Month 1 Project 1
 # Samiullah | Registration No: CX-INT-2026-PY-0057
 
-# Initialize Colorama (autoreset=True removes manually adding Style.RESET_ALL)
+
 init(autoreset=True)
 
 
@@ -19,7 +19,7 @@ init(autoreset=True)
 # ==========================================
 expenses = []
 expense_id = 1
-monthly_budget = 0.0  # 0.0 means no budget configured
+monthly_budget = 0.0 
 FILE_NAME = "expenses.txt"
 
 
@@ -53,11 +53,12 @@ def display_menu():
     print(f"{Fore.GREEN}[7]. {Style.RESET_ALL}Set Monthly Budget")
     print(f"{Fore.GREEN}[8]. {Style.RESET_ALL}Export to CSV Format")
     print(f"{Fore.GREEN}[9]. {Style.RESET_ALL}Sort Expenses")
-    print(f"{Fore.GREEN}[10]. {Style.RESET_ALL}Save Expenses")
-    print(f"{Fore.GREEN}[11]. {Style.RESET_ALL}Save and Exit")
+    print(f"{Fore.GREEN}[10]. {Style.RESET_ALL}Monthly Statistics")
+    print(f"{Fore.GREEN}[11]. {Style.RESET_ALL}Save Expenses")
+    print(f"{Fore.GREEN}[12]. {Style.RESET_ALL}Save and Exit")
     print(f"{Fore.BLUE}{'=' * 50}")
 
-    # Budget Warning Indicator
+    
     if monthly_budget > 0:
         current_month = datetime.now().strftime("%Y-%m")
         current_month_spent = sum(
@@ -67,14 +68,14 @@ def display_menu():
         )
 
         print(
-            f"{Fore.MAGENTA}📌 Monthly Budget Target: PKR {monthly_budget:,.2f} | Spent: PKR {current_month_spent:,.2f}"
+            f"{Fore.MAGENTA}Monthly Budget Target: PKR {monthly_budget:,.2f} | Spent: PKR {current_month_spent:,.2f}"
         )
 
         if current_month_spent > monthly_budget:
             excess = current_month_spent - monthly_budget
             print(f"{Fore.RED}{'=' * 50}")
             print(
-                f"{Fore.RED}{Style.BRIGHT}⚠️  WARNING: You have EXCEEDED your monthly budget by PKR {excess:,.2f}!"
+                f"{Fore.RED}{Style.BRIGHT}WARNING: You have EXCEEDED your monthly budget by PKR {excess:,.2f}!"
             )
             print(f"{Fore.RED}{'=' * 50}")
 
@@ -99,7 +100,7 @@ def set_monthly_budget():
                 continue
             monthly_budget = val
             print(
-                f"\n{Fore.GREEN}✅ Monthly budget target successfully set to PKR {monthly_budget:,.2f}!"
+                f"\n{Fore.GREEN}Monthly budget target successfully set to PKR {monthly_budget:,.2f}!"
             )
             break
         except ValueError:
@@ -390,6 +391,69 @@ def sort_expenses():
     view_expenses(sorted_list, title=title)
 
 
+def monthly_statistics():
+    if not expenses:
+        print(f"\n{Fore.YELLOW}No expenses recorded yet to calculate monthly stats!")
+        return
+
+    monthly_data = {}
+
+    for exp in expenses:
+        date_str = exp.get("date", "")
+        # Extract YYYY-MM prefix from timestamp
+        month_key = date_str[:7] if len(date_str) >= 7 else "Unknown"
+
+        if month_key not in monthly_data:
+            monthly_data[month_key] = {"total": 0.0, "count": 0}
+
+        monthly_data[month_key]["total"] += exp["amount"]
+        monthly_data[month_key]["count"] += 1
+
+    # Sort months chronologically
+    sorted_months = sorted(monthly_data.keys())
+
+    # Find highest and lowest spending months
+    highest_month = max(monthly_data.items(), key=lambda x: x[1]["total"])
+    lowest_month = min(monthly_data.items(), key=lambda x: x[1]["total"])
+
+    print(f"\n{Fore.BLUE}" + "=" * 60)
+    print(f"{Fore.CYAN}{Style.BRIGHT}              --- MONTHLY STATISTICS ---              ")
+    print(f"{Fore.BLUE}" + "=" * 60)
+
+    print(
+        f"{Fore.MAGENTA}{Style.BRIGHT}{'Month':<12} {'Total Spent (PKR)':>18} {'Tx Count':>12} {'Avg/Tx (PKR)':>15}"
+    )
+    print(f"{Fore.BLUE}" + "-" * 60)
+
+    for m in sorted_months:
+        tot = monthly_data[m]["total"]
+        cnt = monthly_data[m]["count"]
+        avg = tot / cnt if cnt > 0 else 0.0
+
+        # Highlight highest month with RED indicator, others with GREEN
+        is_highest = (m == highest_month[0] and len(sorted_months) > 1)
+        color = Fore.RED if is_highest else Fore.GREEN
+
+        m_display = f"{m} 🔥" if is_highest else m
+        print(
+            f"{m_display:<12} {color}{tot:>18.2f}{Style.RESET_ALL} {cnt:>12} {avg:>15.2f}"
+        )
+
+    print(f"{Fore.BLUE}" + "=" * 60)
+    
+    # Key Highlights Box
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}📊 KEY HIGHLIGHTS:")
+    print(
+        f"  🔥 {Style.BRIGHT}Highest Spending Month: {Fore.RED}{highest_month[0]}{Style.RESET_ALL} "
+        f"(PKR {highest_month[1]['total']:,.2f} across {highest_month[1]['count']} transactions)"
+    )
+    print(
+        f"  💡 {Style.BRIGHT}Lowest Spending Month : {Fore.GREEN}{lowest_month[0]}{Style.RESET_ALL} "
+        f"(PKR {lowest_month[1]['total']:,.2f} across {lowest_month[1]['count']} transactions)"
+    )
+    print(f"{Fore.BLUE}" + "=" * 60)
+
+
 def delete_expense():
 
     if not expenses:
@@ -531,7 +595,7 @@ def main():
     while True:
         clear_screen()
         display_menu()
-        choice = input(f"{Fore.CYAN}Select option [1-11]: {Style.RESET_ALL}").strip()
+        choice = input(f"{Fore.CYAN}Select option [1-12]: {Style.RESET_ALL}").strip()
         print()
 
         match choice:
@@ -554,15 +618,17 @@ def main():
             case "9":
                 sort_expenses()
             case "10":
-                save_expenses()
+                monthly_statistics()
             case "11":
+                save_expenses()
+            case "12":
                 save_expenses()
                 print(f"{Fore.CYAN}Exiting......")
                 break
             case _:
-                print(f"{Fore.RED}Invalid Option! Please select from [1-11]")
+                print(f"{Fore.RED}Invalid Option! Please select from [1-12]")
 
-        if choice != "11":
+        if choice != "12":
             input(f"\n{Style.DIM}Press Enter to continue...")
 
 
