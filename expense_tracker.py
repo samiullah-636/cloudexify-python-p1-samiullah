@@ -45,11 +45,12 @@ def display_menu():
     print("[3]. Category summary")
     print("[4]. Filter By Category")
     print("[5]. Delete Expense")
-    print("[6]. Set Monthly Budget")
-    print("[7]. Export to CSV Format")
-    print("[8]. Sort Expenses")
-    print("[9]. Save Expenses")
-    print("[10]. Save and Exit")
+    print("[6]. Edit Expense")
+    print("[7]. Set Monthly Budget")
+    print("[8]. Export to CSV Format")
+    print("[9]. Sort Expenses")
+    print("[10]. Save Expenses")
+    print("[11]. Save and Exit")
     print("=" * 50)
 
     # Budget Warning Indicator
@@ -165,6 +166,78 @@ def add_expense():
             )
 
     expense_id += 1
+
+
+def edit_expense():
+    if not expenses:
+        print("\nNo expenses recorded yet to edit!")
+        return
+
+    view_expenses()
+
+    while True:
+        try:
+            target_id = int(
+                input("\nEnter the ID of the expense to edit: ")
+            )
+            break
+        except ValueError:
+            print("Enter a valid number.")
+
+    target_expense = None
+    for exp in expenses:
+        if exp["id"] == target_id:
+            target_expense = exp
+            break
+
+    if not target_expense:
+        print(f"\nError: Expense with ID {target_id} not found!")
+        return
+
+    print("\n--- EDIT EXPENSE ---")
+    print("(Press Enter without typing to keep the existing value)")
+
+    # 1. New Description
+    new_desc = input(
+        f"Description [{target_expense['description']}]: "
+    ).strip()
+    if new_desc:
+        target_expense["description"] = new_desc
+
+    # 2. New Amount
+    while True:
+        amt_str = input(
+            f"Amount PKR [{target_expense['amount']}]: "
+        ).strip()
+        if not amt_str:
+            break
+        try:
+            new_amt = float(amt_str)
+            if new_amt <= 0:
+                print("Amount must be greater than zero!")
+                continue
+            target_expense["amount"] = new_amt
+            break
+        except ValueError:
+            print("Please enter a valid number.")
+
+    # 3. New Category
+    categories = ["Food", "Transport", "Shopping", "Bills", "Other"]
+    print(f"\nCurrent Category: {target_expense['category']}")
+    print("Select New Category (or press Enter to keep current):")
+    for index, category_name in enumerate(categories, 1):
+        print(f"  {index}). {category_name}")
+
+    cat_choice = input("Choice (1-5): ").strip()
+    if cat_choice:
+        try:
+            c_int = int(cat_choice)
+            if 1 <= c_int <= len(categories):
+                target_expense["category"] = categories[c_int - 1]
+        except ValueError:
+            print("Invalid category selection. Keeping current category.")
+
+    print(f"\n✅ Expense ID #{target_id} successfully updated!")
 
 
 def view_expenses(custom_list=None, title="ALL EXPENSES"):
@@ -454,7 +527,7 @@ def main():
     while True:
         clear_screen()
         display_menu()
-        choice = input("select option [1-10]: ").strip()
+        choice = input("select option [1-11]: ").strip()
         print()
 
         match choice:
@@ -469,21 +542,23 @@ def main():
             case "5":
                 delete_expense()
             case "6":
-                set_monthly_budget()
+                edit_expense()
             case "7":
-                export_to_csv()
+                set_monthly_budget()
             case "8":
-                sort_expenses()
+                export_to_csv()
             case "9":
-                save_expenses()
+                sort_expenses()
             case "10":
+                save_expenses()
+            case "11":
                 save_expenses()
                 print("Exiting......")
                 break
             case _:
-                print("Invalid Option! Please select from [1-10]")
+                print("Invalid Option! Please select from [1-11]")
 
-        if choice != "10":
+        if choice != "11":
             input("\nPress Enter to continue...")
 
 
