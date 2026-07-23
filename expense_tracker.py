@@ -1,7 +1,8 @@
-from pyfiglet import Figlet
-import shutil
 import os
+import shutil
 import subprocess
+from datetime import datetime
+from pyfiglet import Figlet
 
 # expense_tracker.py
 # CloudExify Python Internship — Month 1 Project 1
@@ -20,6 +21,7 @@ FILE_NAME = "expenses.txt"
 # Terminal & UI Helpers
 # ==========================================
 
+
 def clear_screen():
     command = "cls" if os.name == "nt" else "clear"
     subprocess.run(command, shell=True)
@@ -34,7 +36,7 @@ def print_banner():
 
 
 def display_menu():
-    print_banner()  
+    print_banner()
     print("=" * 40)
     print("[1]. Add Expense")
     print("[2]. View Expenses")
@@ -45,9 +47,11 @@ def display_menu():
     print("[7]. Save and Exit")
     print("=" * 40)
 
+
 # ==========================================
 # Core Logic Functions
 # ==========================================
+
 
 def add_expense():
     global expense_id
@@ -84,61 +88,60 @@ def add_expense():
         except ValueError:
             print("Enter a valid number!")
 
+    # Capture current Date and Time
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+
     expense = {
         "id": expense_id,
         "description": description,
         "amount": amount,
         "category": category,
+        "date": current_time,
     }
 
     expenses.append(expense)
-    print(f"\nExpense added successfully! Assigned ID: {expense_id}")
+    print(
+        f"\nExpense added successfully at {current_time}! Assigned ID: {expense_id}"
+    )
 
     expense_id += 1
 
 
 def view_expenses():
-    
+
     if not expenses:
         print("\nNo Expenses for now!")
         return
 
-    print("\n" + "=" * 52)
+    print("\n" + "=" * 70)
     print("                --- ALL EXPENSES ---                ")
-    print("=" * 52)
-
+    print("=" * 70)
 
     print(
-        f"{'ID':<5} {'Description':<20} {'Category':<12} {'Amount (PKR)':>12}"
+        f"{'ID':<5} {'Date/Time':<18} {'Description':<18} {'Category':<10} {'Amount (PKR)':>12}"
     )
-    print("-" * 52)
+    print("-" * 70)
 
     total_amount = 0.0
 
-    
     for exp in expenses:
+        dt = exp.get("date", "N/A")
         print(
-            f"{exp['id']:<5} "
-            f"{exp['description']:<20} "
-            f"{exp['category']:<12} "
-            f"{exp['amount']:>12.2f}"
+            f"#{exp['id']:<4} {dt:<18} {exp['description']:<18} {exp['category']:<10} {exp['amount']:>12.2f}"
         )
         total_amount += exp["amount"]
 
-    
-    print("-" * 52)
-    print(f"{'TOTAL EXPENSE:':<38} PKR {total_amount:>9.2f}")
-    print("=" * 52)
-
+    print("-" * 70)
+    print(f"{'TOTAL EXPENSE:':<55} PKR {total_amount:>9.2f}")
+    print("=" * 70)
 
 
 def category_summary():
-    
+
     if not expenses:
         print("\nNo Expenses for now!")
         return
 
-    
     summary = {}
     grand_total = 0.0
 
@@ -153,7 +156,6 @@ def category_summary():
 
         grand_total += amt
 
-    
     print("\n" + "=" * 45)
     print("            --- CATEGORY SUMMARY ---         ")
     print("=" * 45)
@@ -174,12 +176,11 @@ def category_summary():
 
 
 def filter_by_category():
-    
+
     if not expenses:
         print("\nNo expenses recorded yet to filter!")
         return
 
-    
     categories = ["Food", "Transport", "Shopping", "Bills", "Other"]
     print("\nSelect Category to Filter:")
     for index, category_name in enumerate(categories, 1):
@@ -195,54 +196,47 @@ def filter_by_category():
         except ValueError:
             print("Please enter a valid number.")
 
-    
     filtered_expenses = [
         exp for exp in expenses if exp["category"] == selected_category
     ]
 
-    
     if not filtered_expenses:
         print(f"\n No expenses found under '{selected_category}' category.")
         return
 
-    
-    print("\n" + "=" * 52)
+    print("\n" + "=" * 70)
     print(
         f"          --- EXPENSES FOR: {selected_category.upper()} ---          "
     )
-    print("=" * 52)
+    print("=" * 70)
     print(
-        f"{'ID':<5} {'Description':<20} {'Category':<12} {'Amount (PKR)':>12}"
+        f"{'ID':<5} {'Date/Time':<18} {'Description':<18} {'Category':<10} {'Amount (PKR)':>12}"
     )
-    print("-" * 52)
+    print("-" * 70)
 
     category_total = 0.0
     for exp in filtered_expenses:
+        dt = exp.get("date", "N/A")
         print(
-            f"{exp['id']:<5} "
-            f"{exp['description']:<20} "
-            f"{exp['category']:<12} "
-            f"{exp['amount']:>12.2f}"
+            f"#{exp['id']:<4} {dt:<18} {exp['description']:<18} {exp['category']:<10} {exp['amount']:>12.2f}"
         )
         category_total += exp["amount"]
 
-    print("-" * 52)
+    print("-" * 70)
     print(
-        f"{f'TOTAL FOR {selected_category.upper()}:':<38} PKR {category_total:>9.2f}"
+        f"{f'TOTAL FOR {selected_category.upper()}:':<55} PKR {category_total:>9.2f}"
     )
-    print("=" * 52)
+    print("=" * 70)
 
 
 def delete_expense():
-    
+
     if not expenses:
         print("\nNo expenses recorded yet to delete!")
         return
 
-    
     view_expenses()
 
-    
     while True:
         try:
             target_id = int(
@@ -252,21 +246,18 @@ def delete_expense():
         except ValueError:
             print("Enter a valid number.")
 
-    
     target_expense = None
     for exp in expenses:
         if exp["id"] == target_id:
             target_expense = exp
             break
 
-    
     if not target_expense:
         print(f"\nError: Expense with ID {target_id} not found!")
         return
 
-    
     print(
-        f"\nFound Expense: [ID: {target_expense['id']} | {target_expense['description']} | PKR {target_expense['amount']}]"
+        f"\nFound Expense: [ID: {target_expense['id']} | Date: {target_expense.get('date', 'N/A')} | {target_expense['description']} | PKR {target_expense['amount']}]"
     )
     confirm = (
         input("Are you sure you want to delete this expense? (y/n): ")
@@ -288,7 +279,10 @@ def save_expenses():
     try:
         with open(FILE_NAME, "w") as file:
             for e in expenses:
-                file.write(f"{e['id']},{e['description']},{e['amount']},{e['category']}\n")
+                dt = e.get("date", "N/A")
+                file.write(
+                    f"{e['id']},{e['description']},{e['amount']},{e['category']},{dt}\n"
+                )
         print(f"\nData successfully saved in '{FILE_NAME}'.")
     except Exception as err:
         print(f"\nError saving data: {err}")
@@ -306,19 +300,22 @@ def load_expenses():
                 line = line.strip()
                 if line:
                     parts = line.split(",")
-                    if len(parts) == 4:
+                    if len(parts) >= 4:
                         rec_id = int(parts[0])
+                        rec_date = parts[4] if len(parts) >= 5 else "N/A"
                         rec = {
                             "id": rec_id,
                             "description": parts[1],
                             "amount": float(parts[2]),
                             "category": parts[3],
+                            "date": rec_date,
                         }
                         expenses.append(rec)
                         if rec_id >= expense_id:
                             expense_id = rec_id + 1
     except Exception as err:
         print(f"\nWarning: Could not read existing file data ({err}).")
+
 
 # ==========================================
 # Main Method
