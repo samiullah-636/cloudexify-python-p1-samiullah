@@ -154,10 +154,10 @@ def add_expense():
 
     expenses.append(expense)
     print(
-        f"\n{Fore.GREEN}✅ Expense added successfully at {current_time}! Assigned ID: #{expense_id}"
+        f"\n{Fore.GREEN}Expense added successfully at {current_time}! Assigned ID: #{expense_id}"
     )
 
-    # Budget Alert Check on Addition
+    
     if monthly_budget > 0:
         c_month = datetime.now().strftime("%Y-%m")
         this_month_spent = sum(
@@ -167,7 +167,7 @@ def add_expense():
         )
         if this_month_spent > monthly_budget:
             print(
-                f"\n{Fore.RED}{Style.BRIGHT}⚠️  ALERT: This expense puts you OVER your monthly budget of PKR {monthly_budget:,.2f}!"
+                f"\n{Fore.RED}{Style.BRIGHT}ALERT: This expense puts you OVER your monthly budget of PKR {monthly_budget:,.2f}!"
             )
 
     expense_id += 1
@@ -202,14 +202,14 @@ def edit_expense():
     print(f"\n{Fore.CYAN}{Style.BRIGHT}--- EDIT EXPENSE ---")
     print(f"{Style.DIM}(Press Enter without typing to keep the existing value)")
 
-    # 1. New Description
+    
     new_desc = input(
         f"Description [{target_expense['description']}]: "
     ).strip()
     if new_desc:
         target_expense["description"] = new_desc
 
-    # 2. New Amount
+
     while True:
         amt_str = input(
             f"Amount PKR [{target_expense['amount']}]: "
@@ -226,7 +226,7 @@ def edit_expense():
         except ValueError:
             print(f"{Fore.RED}Please enter a valid number.")
 
-    # 3. New Category
+    
     categories = ["Food", "Transport", "Shopping", "Bills", "Other"]
     print(f"\nCurrent Category: {target_expense['category']}")
     print(f"{Fore.YELLOW}Select New Category (or press Enter to keep current):")
@@ -242,7 +242,7 @@ def edit_expense():
         except ValueError:
             print(f"{Fore.YELLOW}Invalid category selection. Keeping current category.")
 
-    print(f"\n{Fore.GREEN}✅ Expense ID #{target_id} successfully updated!")
+    print(f"\n{Fore.GREEN}Expense ID #{target_id} successfully updated!")
 
 
 def view_expenses(custom_list=None, title="ALL EXPENSES"):
@@ -400,7 +400,7 @@ def monthly_statistics():
 
     for exp in expenses:
         date_str = exp.get("date", "")
-        # Extract YYYY-MM prefix from timestamp
+        
         month_key = date_str[:7] if len(date_str) >= 7 else "Unknown"
 
         if month_key not in monthly_data:
@@ -409,10 +409,10 @@ def monthly_statistics():
         monthly_data[month_key]["total"] += exp["amount"]
         monthly_data[month_key]["count"] += 1
 
-    # Sort months chronologically
+    
     sorted_months = sorted(monthly_data.keys())
 
-    # Find highest and lowest spending months
+    
     highest_month = max(monthly_data.items(), key=lambda x: x[1]["total"])
     lowest_month = min(monthly_data.items(), key=lambda x: x[1]["total"])
 
@@ -430,25 +430,25 @@ def monthly_statistics():
         cnt = monthly_data[m]["count"]
         avg = tot / cnt if cnt > 0 else 0.0
 
-        # Highlight highest month with RED indicator, others with GREEN
+        
         is_highest = (m == highest_month[0] and len(sorted_months) > 1)
         color = Fore.RED if is_highest else Fore.GREEN
 
-        m_display = f"{m} 🔥" if is_highest else m
+        m_display = f"{m} " if is_highest else m
         print(
             f"{m_display:<12} {color}{tot:>18.2f}{Style.RESET_ALL} {cnt:>12} {avg:>15.2f}"
         )
 
     print(f"{Fore.BLUE}" + "=" * 60)
     
-    # Key Highlights Box
-    print(f"\n{Fore.CYAN}{Style.BRIGHT}📊 KEY HIGHLIGHTS:")
+    
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}KEY HIGHLIGHTS:")
     print(
-        f"  🔥 {Style.BRIGHT}Highest Spending Month: {Fore.RED}{highest_month[0]}{Style.RESET_ALL} "
+        f"  {Style.BRIGHT}Highest Spending Month: {Fore.RED}{highest_month[0]}{Style.RESET_ALL} "
         f"(PKR {highest_month[1]['total']:,.2f} across {highest_month[1]['count']} transactions)"
     )
     print(
-        f"  💡 {Style.BRIGHT}Lowest Spending Month : {Fore.GREEN}{lowest_month[0]}{Style.RESET_ALL} "
+        f"  {Style.BRIGHT}Lowest Spending Month : {Fore.GREEN}{lowest_month[0]}{Style.RESET_ALL} "
         f"(PKR {lowest_month[1]['total']:,.2f} across {lowest_month[1]['count']} transactions)"
     )
     print(f"{Fore.BLUE}" + "=" * 60)
@@ -492,7 +492,7 @@ def delete_expense():
 
     if confirm in ["y", "yes"]:
         expenses.remove(target_expense)
-        print(f"\n{Fore.GREEN}✅ Expense ID #{target_id} deleted successfully!")
+        print(f"\n{Fore.GREEN}Expense ID #{target_id} deleted successfully!")
     else:
         print(f"\n{Fore.YELLOW}Deletion cancelled. Expense was not removed.")
 
@@ -529,7 +529,7 @@ def export_to_csv():
                 )
 
         print(
-            f"\n{Fore.GREEN}✅ All expense records successfully exported to '{csv_filename}'!"
+            f"\n{Fore.GREEN} All expense records successfully exported to '{csv_filename}'!"
         )
     except Exception as err:
         print(f"\n{Fore.RED}Error exporting to CSV: {err}")
@@ -547,7 +547,7 @@ def save_expenses():
                 file.write(
                     f"{e['id']},{e['description']},{e['amount']},{e['category']},{dt}\n"
                 )
-        print(f"\n{Fore.GREEN}✅ Data successfully saved in '{FILE_NAME}'.")
+        print(f"\n{Fore.GREEN}Data successfully saved in '{FILE_NAME}'.")
     except Exception as err:
         print(f"\n{Fore.RED}Error saving data: {err}")
 
