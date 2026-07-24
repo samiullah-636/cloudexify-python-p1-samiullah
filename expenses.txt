@@ -1,0 +1,12 @@
+BUDGET:0.0
+1,dinner out,500.0,Food,2026-07-23 16:33
+2,Bank Fee,100.0,Other,2026-07-24 06:44
+3,car tank full,13000.0,Transport,2026-07-24 06:44
+4,car maintainance,2500.0,Transport,2026-07-24 06:44
+5,t-shirt purchase,899.0,Shopping,2026-07-24 06:45
+6,Internet Bill,1300.0,Bills,2026-07-24 06:45
+7,Electricity Bill,10000.0,Bills,2026-07-24 06:45
+8,Lunch out,660.0,Food,2026-07-24 06:46
+9,Rent,35000.0,Other,2026-07-24 06:46
+10,Gas Bill,1500.0,Bills,2026-07-24 06:46
+11,Groceries,25000.0,Food,2026-07-24 06:46
