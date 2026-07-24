@@ -35,7 +35,7 @@ A feature-packed, interactive Command-Line Interface (CLI) Expense Tracker built
 
 ### 1. Clone the Repository:
 ```bash
-git clone [https://github.com/your-username/expense-tracker.git](https://github.com/your-username/expense-tracker.git)
+git clone https://github.com/samiullah-636/cloudexify-python-p1-samiullah.git
 cd expense-tracker
 ```
 
